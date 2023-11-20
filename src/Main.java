@@ -2,20 +2,34 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+
+        System.out.println(Arrays.toString(new int[1]));
     }
 }
 
+
+
+// my solution passes 65/71 then time exceeded
 class Solution {
     List<Integer> ans = new ArrayList<>();
-    PriorityQueue<int[]> rootDepthPairs = new PriorityQueue<>();
+    PriorityQueue<int[]> rootDepthPairs = new PriorityQueue<>((a, b) -> Integer.compare(a[0], b[0]));
     Map<Integer, ArrayList<Integer>> adjacencyMap = new HashMap<>();
 
 
     public List<Integer> findMinHeightTrees(int n, int[][] edges) {
+        if (edges.length == 0){ // another weird edge case
+            ans.add(0);
+            return ans;
+        }
 
-         // loops all vertex pairs to create arraylist
-        for(int[] edge: edges){ // value of all vertices current vertex shares an edge with
+        if(n == 1 || n == 2){ // edge case, depth must be 1 or 2. return those edges
+            for(int[] edge: edges){
+                ans.add(edge[0]);
+                return ans;
+            }
+        }
+
+        for(int[] edge: edges){
             if(!adjacencyMap.containsKey(edge[0])){
                 adjacencyMap.put(edge[0],new ArrayList<>());
             }
@@ -53,25 +67,99 @@ class Solution {
 
 
     private int DFS(int root, int height, Map<Integer,Boolean> visited){
-        System.out.println(root);
         ArrayList<Integer> neighbors = adjacencyMap.get(root);
         visited.put(root,true);
         int maxH = height;
 
-
         for(int neighbor: neighbors){
             if(!visited.containsKey(neighbor)){
-                int curH = DFS(root,height+1,visited);
+                int curH = DFS(neighbor,height+1,visited);
                 maxH = Math.max(curH, maxH);
             }
         }
         return maxH;
 
-                // may actually have to compare max depth among all neighbors, and keep max height since it only takes
-        // one node in a new row to change the tree height
-
     }
 }
+
+
+// RECORD OF DEBUGGING
+//class Solution {
+//    List<Integer> ans = new ArrayList<>();
+//    PriorityQueue<int[]> rootDepthPairs = new PriorityQueue<>((a, b) -> Integer.compare(a[0], b[0]));
+//    Map<Integer, ArrayList<Integer>> adjacencyMap = new HashMap<>();
+//
+//
+//    public List<Integer> findMinHeightTrees(int n, int[][] edges) {
+//
+//        // loops all vertex pairs to create arraylist
+//        for(int[] edge: edges){ // value of all vertices current vertex shares an edge with
+//            if(!adjacencyMap.containsKey(edge[0])){
+//                adjacencyMap.put(edge[0],new ArrayList<>());
+//            }
+//            adjacencyMap.get(edge[0]).add(edge[1]);
+////            System.out.println(adjacencyMap.get(edge[0])); adjacency list working as expected
+//
+//            if(!adjacencyMap.containsKey(edge[1])){
+//                adjacencyMap.put(edge[1],new ArrayList<>());
+//            }
+//            adjacencyMap.get(edge[1]).add(edge[0]);
+////            System.out.println(adjacencyMap.get(edge[1])); working here too
+//
+//        }
+//
+//
+//
+//        for(int root: adjacencyMap.keySet()){
+//            Map<Integer,Boolean> visited = new HashMap<>();
+//            int maxHeight = DFS(root,1, visited);
+//            System.out.println(maxHeight);
+//            // could forgo the whole PQ and just record root of least known height so far and if new lesser height foud, just
+//            // wipe ans by set ans to new arraylist
+//
+//            int[] pair = {maxHeight,root};
+//            rootDepthPairs.add(pair);
+//        }
+//
+//        if(rootDepthPairs.isEmpty()){
+//            return new ArrayList<>();
+//        }
+//
+//        int minHeight = rootDepthPairs.peek()[0];
+//        while (rootDepthPairs.peek()[0] == minHeight){
+//            ans.add(rootDepthPairs.poll()[1]);
+//        }
+//
+//        return ans;
+//
+//    }
+//
+//
+//    private int DFS(int root, int height, Map<Integer,Boolean> visited){
+//        System.out.println(root + " root from DFS first line"); // this is fine. prints root
+//        ArrayList<Integer> neighbors = adjacencyMap.get(root);
+//        System.out.println(neighbors + " neighbors arraylist from DFS"); // this is also fine, prints the arraylist
+//        visited.put(root,true);
+//        System.out.println(visited.get(root)); // also fine, prints true for root
+//        int maxH = height;
+//        System.out.println(maxH + " maxH from DFS"); // height is the only thing that is incrementing even though root same
+//
+//
+//        for(int neighbor: neighbors){
+//            if(!visited.containsKey(neighbor)){
+////                System.out.println(neighbor + "neighbor from DFS for loop"); // prints same neighbor in infinite loop
+//                // int curH = DFS(root,height+1,visited); // **ERROR** passing root instead of neighbor
+//                int curH = DFS(neighbor,height+1,visited);
+//                maxH = Math.max(curH, maxH);
+//            }
+//        }
+//        return maxH;
+//
+//        // may actually have to compare max depth among all neighbors, and keep max height since it only takes
+//        // one node in a new row to change the tree height
+//
+//    }
+//}
 
 // here is the concept: a graph that does not have cycles is just a tree. a node can have any number of children as long
 // as it doesn't connect with other children, other parents, etc. that would cause a cycle
