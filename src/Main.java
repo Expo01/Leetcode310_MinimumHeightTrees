@@ -8,6 +8,57 @@ public class Main {
 }
 
 
+class Solution {
+    public List<Integer> findMinHeightTrees(int n, int[][] edges) {
+
+        // edge cases
+        if (n < 2) {
+            ArrayList<Integer> centroids = new ArrayList<>();
+                centroids.add(0); // this works becaus the nodes are labeled 0 - (n-1). so min height root must be 0 if
+            return centroids; //  only 1 node (or zero?) exists
+        }
+
+        // Build the graph with the adjacency list
+        ArrayList<Set<Integer>> neighbors = new ArrayList<>();
+        for (int i = 0; i < n; i++)
+            neighbors.add(new HashSet<Integer>());
+
+        for (int[] edge : edges) {
+            Integer start = edge[0], end = edge[1];
+            neighbors.get(start).add(end); // gets arraylist at index of 'start' which is also the value of the vertex
+            neighbors.get(end).add(start); // add reciprocal edge from end of start
+        }
+
+        // Initialize the first layer of leaves
+        ArrayList<Integer> leaves = new ArrayList<>();
+        for (int i = 0; i < n; i++)
+            if (neighbors.get(i).size() == 1) // this is how minimum dependency/leaf is determined, but assessing size
+                leaves.add(i); // of its arraylist which will state # of vertices is has an edge with
+
+        // Trim the leaves until reaching the centroids
+        int remainingNodes = n;
+        while (remainingNodes > 2) {
+            remainingNodes -= leaves.size();
+            ArrayList<Integer> newLeaves = new ArrayList<>(); // will hold 'new leaves' that are next rung closer to centroid(s)
+
+            // remove the current leaves along with the edges
+            for (Integer leaf : leaves) {
+                Integer neighbor = neighbors.get(leaf).iterator().next(); // gets the next vertex that is closer to centroid
+                // stores its value
+                neighbors.get(neighbor).remove(leaf); // removes current leaf
+                if (neighbors.get(neighbor).size() == 1) // adds 'new leaf' to the 'queue' which is the arraylist with iterator
+                    newLeaves.add(neighbor);
+            }
+
+            // prepare for the next round
+            leaves = newLeaves;
+        }
+
+        // The remaining nodes are the centroids of the graph
+        return leaves;
+    }
+}
+
 
 // my solution passes 65/71 then time exceeded
 class Solution {
